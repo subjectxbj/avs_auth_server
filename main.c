@@ -14,50 +14,48 @@
 
 #define CONNMAX 1000
 #define BYTES 1024
+#define PORT "3000"
+#define CONFIG "AlexaClientSDKConfig.json"
 
-char *ROOT;
+char config_file_path[1024];
+char port[16];
 int listenfd, clients[CONNMAX];
 void error(char *);
 void startServer(char *);
 void respond(int);
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
 	struct sockaddr_in clientaddr;
 	socklen_t addrlen;
-	char c;    
-	
-	//Default Values PATH = ~/ and PORT=10000
-	char PORT[6];
-	ROOT = getenv("PWD");
-	strcpy(PORT,"10000");
+	int c;    
 
 	int slot=0;
 
+	strcpy(config_file_path, CONFIG);
+	strcpy(port, PORT);
 	//Parsing the command line arguments
-	while ((c = getopt (argc, argv, "p:r:")) != -1)
+
+	while ((c = getopt (argc, argv, "p:f:")) != -1) {
 		switch (c)
 		{
-			case 'r':
-				ROOT = malloc(strlen(optarg));
-				strcpy(ROOT,optarg);
+			case 'f':
+				strcpy(config_file_path, optarg);
 				break;
 			case 'p':
-				strcpy(PORT,optarg);
+				strcpy(port,optarg);
 				break;
-			case '?':
-				fprintf(stderr,"Wrong arguments given!!!\n");
-				exit(1);
 			default:
-				exit(1);
+				exit(-1);
 		}
-	
-	printf("Server started at port no. %s%s%s with root directory as %s%s%s\n","\033[92m",PORT,"\033[0m","\033[92m",ROOT,"\033[0m");
+	}
+
+	printf("Server started at port no. %s%s%s with config file %s%s%s\n","\033[92m",port,"\033[0m","\033[92m",config_file_path,"\033[0m");
 	// Setting all elements to -1: signifies there is no client connected
 	int i;
 	for (i=0; i<CONNMAX; i++)
 		clients[i]=-1;
-	startServer(PORT);
+	startServer(port);
 
 	// ACCEPT connections
 	while (1)
@@ -111,6 +109,9 @@ void startServer(char *port)
 	}
 
 	freeaddrinfo(res);
+	unsigned char bOptVal= 1;
+	int bOptLen = sizeof(bOptVal);
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (void*)&bOptVal, bOptLen);
 
 	// listen for incoming connections
 	if ( listen (listenfd, 1000000) != 0 )
@@ -130,7 +131,7 @@ void respond(int n)
 	memset( (void*)mesg, (int)'\0', 99999 );
 
 	rcvd=recv(clients[n], mesg, 99999, 0);
-        printf("!!!!!!!!Received request from client\n");
+        printf("!!!!!!!!Received request from client %d\n", n);
 
 	if (rcvd<0)    // receive error
 		fprintf(stderr,("recv() error\n"));
@@ -156,22 +157,6 @@ void respond(int n)
 				}else if (strncmp(reqline[1], "/authresponse", 13)==0) {
 					ret = handleAuthCodeGrant(clients[n], reqline[1]);
 				}
-
-/*	
-				reqline[1] = "/index.html";        //Because if no file is specified, index.html will be opened by default (like it happens in APACHE...
-
-				strcpy(path, ROOT);
-				strcpy(&path[strlen(ROOT)], reqline[1]);
-				printf("file: %s\n", path);
-
-				if ( (fd=open(path, O_RDONLY))!=-1 )    //FILE FOUND
-				{
-					send(clients[n], "HTTP/1.0 200 OK\n\n", 17, 0);
-					while ( (bytes_read=read(fd, data_to_send, BYTES))>0 )
-						write (clients[n], data_to_send, bytes_read);
-				}
-				else    write(clients[n], "HTTP/1.0 404 Not Found\n", 23); //FILE NOT FOUND
-*/
 			}
 		}
 	}
