@@ -11,6 +11,7 @@
 #include<fcntl.h>
 #include "cJSON.h"
 #include "lwa.h"
+#include "config.h"
 
 #define CONNMAX 1000
 #define BYTES 1024
@@ -23,6 +24,7 @@ int listenfd, clients[CONNMAX];
 void error(char *);
 void startServer(char *);
 void respond(int);
+cJSON *json_config = NULL;
 
 int main(int argc, char** argv)
 {
@@ -51,6 +53,9 @@ int main(int argc, char** argv)
 	}
 
 	printf("Server started at port no. %s%s%s with config file %s%s%s\n","\033[92m",port,"\033[0m","\033[92m",config_file_path,"\033[0m");
+	
+	json_config = getCleanConfig(config_file_path);
+
 	// Setting all elements to -1: signifies there is no client connected
 	int i;
 	for (i=0; i<CONNMAX; i++)

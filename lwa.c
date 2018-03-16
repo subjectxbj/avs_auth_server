@@ -12,6 +12,7 @@
 #include "cJSON.h"
 #include "lwa.h"
 #include "curl.h"
+#include "config.h"
 
 char * productId = "GC4026E";
 char * deviceSerialNumber = "CXNK000ABCDE";
@@ -50,9 +51,11 @@ char*  getRedirectUrl(){
         cJSON *alexa_all, *attr;
         cJSON *root = cJSON_CreateObject();
         cJSON_AddItemToObject(root, "alexa:all", alexa_all=cJSON_CreateObject());
-        cJSON_AddStringToObject(alexa_all, "productID", productId);
+        //cJSON_AddStringToObject(alexa_all, "productID", productId);
+        cJSON_AddStringToObject(alexa_all, "productID",get_config_param_value(json_config, "productId"));
         cJSON_AddItemToObject(alexa_all, "productInstanceAttributes", attr=cJSON_CreateObject());
-        cJSON_AddStringToObject(attr, "deviceSerialNumber", deviceSerialNumber);
+        //cJSON_AddStringToObject(attr, "deviceSerialNumber", deviceSerialNumber);
+        cJSON_AddStringToObject(attr, "deviceSerialNumber", get_config_param_value(json_config, "deviceSerialNumber"));
         scopeData = cJSON_Print(root);
         cJSON_Delete(root);
         //printf("%s", scopeData);
@@ -61,7 +64,8 @@ char*  getRedirectUrl(){
         strcat(lwaUrl, "https://www.amazon.com/ap/oa/?");
 
         char param[512];
-        sprintf(param, "client_id=%s", clientId);
+        //sprintf(param, "client_id=%s", clientId);
+        sprintf(param, "client_id=%s", get_config_param_value(json_config, "clientId"));
         strcat(lwaUrl, param);
         strcat(lwaUrl, "&");
 
@@ -98,6 +102,8 @@ void parseResponse(char *response) {
 				char *refreshToken = refreshTokenObject->valuestring;
 				if(refreshToken) {
 					printf("\n==============>Get Refresh Token: %s\n", refreshToken);
+					update_config_param(json_config, "refreshToken", refreshToken);
+					writeConfig(json_config, "result.json");
 				}
 			}
 		}else{
@@ -134,8 +140,8 @@ int requestRefreshToken(char *code) {
 		sprintf(params, "grant_type=%s&code=%s&client_id=%s&client_secret=%s&redirect_uri=%s",
 			"authorization_code",
 			code,
-			clientId,
-			clientSecret,
+			get_config_param_value(json_config, "clientId"),//clientId,
+			get_config_param_value(json_config, "clientSecret"),//clientSecret,
 			urlencode(redirectUri)
 			);
 		//printf("Params: %s\n",params);

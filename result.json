@@ -1,0 +1,25 @@
+{
+	"authDelegate":	{
+		"clientSecret":	"70c955eaa6b998bb3eff97f051b18a5f72b21d38e3ba102da1e83aafdd0efa1f",
+		"deviceSerialNumber":	"CXNK000ABCDE",
+		"refreshToken":	"Atzr|IwEBILlerm3bmyfI8ovGqoyl8T7FN-6wPrA9Cf3BPcxkXfrCJoLAHtj-ivjqO-tLbkDzYjdNeYUKYwxvs67wjOpUXFxfI5vMWolUNjM18MsFrsRTZAi6UWokdumZMByqmoGEXSokXxobPy0lweV691fGNPLK_8_Ynrp9rpEy2Cf-TeR7PoVDMLURiV0TVauIXIQeit_JABSLS-ijAmlHz2lgn3e82qmlonD5gQwj4Rlx4W5AoU3Pdph176IlfgYSmoJydvIQjlgfnZGJUyeG8OGlVusGdvIUGiIKOoRobUS0zf7fFbvKvhnZTC1Ann_kt1b8OzvYzXKMIFaQzJUbJKT8TiteCFjtMTw8R_VlhHB9L6cG9P1d3JSgAKzYB_zIAKHmaYIHw99mlPcuytFFv0ETE5NhlwE996wK5h5fc6vaTp-XBMmV_M_M4WseZFyMt3n2ytXN03HXXBWrYFpKjwY04tvAD2WjbEaPIlrqaWFc9RUIrcNgw4njeV2CpUHQ-IXmH7p1ffJVhuKOoXigve1pnVl0",
+		"clientId":	"amzn1.application-oa2-client.a308f3dc39a54349b970f19b13c86f5d",
+		"productId":	"GC4026E"
+	},
+	"alertsCapabilityAgent":	{
+		"databaseFilePath":	"${SDK_SQLITE_DATABASE_FILE_PATH}",
+		"alarmSoundFilePath":	"${SDK_ALARM_DEFAULT_SOUND_FILE_PATH}",
+		"alarmShortSoundFilePath":	"${SDK_ALARM_SHORT_SOUND_FILE_PATH}",
+		"timerSoundFilePath":	"${SDK_TIMER_DEFAULT_SOUND_FILE_PATH}",
+		"timerShortSoundFilePath":	"${SDK_TIMER_SHORT_SOUND_FILE_PATH}"
+	},
+	"settings":	{
+		"databaseFilePath":	"${SDK_SQLITE_SETTINGS_DATABASE_FILE_PATH}",
+		"defaultAVSClientSettings":	{
+			"locale":	"${SETTING_LOCALE_VALUE}"
+		}
+	},
+	"certifiedSender":	{
+		"databaseFilePath":	"${SDK_CERTIFIED_SENDER_DATABASE_FILE_PATH}"
+	}
+}
