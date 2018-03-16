@@ -1,0 +1,25 @@
+{
+	"authDelegate":	{
+		"clientSecret":	"70c955eaa6b998bb3eff97f051b18a5f72b21d38e3ba102da1e83aafdd0efa1f",
+		"deviceSerialNumber":	"CXNK000ABCDE",
+		"refreshToken":	"Atzr|IwEBILwbw6cVODy5y5mqhqcfDdonuknQAcXQnsS3lOJyn1-na7qYVvlhjuBjVJ4_ykNzkwuDLk88tiuKnek9qWAW4wGWvCGEJpUsuGg3AhNIgzscT7vUwLAnnxW7uTJLKwiUj1TvRnX182JkAUMwJaRWYZyC8X2YG0FfX-qtJNqOohrIaGN8DI6G3maLMntOon1igXVLyNtvl5w7IZRo8xA-hBxffb4_i6_oAN6FnSekKwtGc6tp6tJP7lEUxaF2J0QoHllKs6sGW-RlcEK7YOcHirQkaHkSJv2il9rt32gxX5Xt-n6a_h6CCL3eu4tRmAUvC0kzB8zsXXoTcJv9XFyzVvlId3eLaKDpiOVWob1lPzMCglNuZlf8FeP5dPHuPQWFYt22xqPRY_c2GnL16y8tpuN4o-c27JbxaWHyxO5zM3ulDExlBmKF7qIR31pT9F0F1Skfzu6M24ZySSum3GsF1YO21WuwwMT6FnDPbkxOfZRm0J-E8TGM4Q-GbuaB-DXP8GNk3esAR6nWG0qwiPgq_uyn",
+		"clientId":	"amzn1.application-oa2-client.a308f3dc39a54349b970f19b13c86f5d",
+		"productId":	"GC4026E"
+	},
+	"alertsCapabilityAgent":	{
+		"databaseFilePath":	"${SDK_SQLITE_DATABASE_FILE_PATH}",
+		"alarmSoundFilePath":	"${SDK_ALARM_DEFAULT_SOUND_FILE_PATH}",
+		"alarmShortSoundFilePath":	"${SDK_ALARM_SHORT_SOUND_FILE_PATH}",
+		"timerSoundFilePath":	"${SDK_TIMER_DEFAULT_SOUND_FILE_PATH}",
+		"timerShortSoundFilePath":	"${SDK_TIMER_SHORT_SOUND_FILE_PATH}"
+	},
+	"settings":	{
+		"databaseFilePath":	"${SDK_SQLITE_SETTINGS_DATABASE_FILE_PATH}",
+		"defaultAVSClientSettings":	{
+			"locale":	"${SETTING_LOCALE_VALUE}"
+		}
+	},
+	"certifiedSender":	{
+		"databaseFilePath":	"${SDK_CERTIFIED_SENDER_DATABASE_FILE_PATH}"
+	}
+}

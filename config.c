@@ -42,6 +42,10 @@ cJSON* getCleanConfig(char *filename) {
 	ssize_t read;
 	//printf("\n==============>Parse Config: %s\n", filename);
 	fd = fopen(filename, "r");
+	if(!fd) {
+		printf("ERROR: Failed to open file %s\n", filename);
+		return NULL;
+	}
 
 	while((read = getline(&pline, &read, fd)) != -1){
 		//printf("%s\n", pline);
@@ -79,6 +83,9 @@ int writeConfig(cJSON *json, char *filename) {
 			size_t len = strlen(output);
 			fwrite(output, len, 1, fd);
 		}
+	}else{
+		printf("ERROR: Failed to open file %s\n", filename);
+		return -1;
 	}
 	fclose(fd);
 	return 0;

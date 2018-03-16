@@ -4,7 +4,7 @@ LIBS = -lcjson -lcurl
 
 CC = gcc
 CFLAGS = -g 
-
+#CFLAGS += -DHARDCODE_CONFIG
 
 ALLOWED_INCLUDE_PATHS = -I./cJSON \
 						-I/usr/include/arm-linux-gnueabihf/curl

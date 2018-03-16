@@ -5,6 +5,7 @@
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<sys/socket.h>
+#include<sys/wait.h>
 #include<arpa/inet.h>
 #include<netdb.h>
 #include<signal.h>
@@ -16,15 +17,24 @@
 #define CONNMAX 1000
 #define BYTES 1024
 #define PORT "3000"
-#define CONFIG "AlexaClientSDKConfig.json"
+#define CONFIG_IN "AlexaClientSDKConfig.json"
+#define CONFIG_OUT "AlexaClientSDKConfig_out.json"
 
-char config_file_path[1024];
-char port[16];
+char config_in_path[256]={0};
+char config_out_path[256]={0};
+char port[16]={0};
 int listenfd, clients[CONNMAX];
+cJSON *json_config = NULL;
+
+
 void error(char *);
 void startServer(char *);
 void respond(int);
-cJSON *json_config = NULL;
+
+
+#ifdef HARDCODE_CONFIG
+#pragma message("Use hard coded config")  
+#endif
 
 int main(int argc, char** argv)
 {
@@ -34,27 +44,36 @@ int main(int argc, char** argv)
 
 	int slot=0;
 
-	strcpy(config_file_path, CONFIG);
+	strcpy(config_in_path, CONFIG_IN);
+	strcpy(config_out_path, CONFIG_OUT);
 	strcpy(port, PORT);
 	//Parsing the command line arguments
 
-	while ((c = getopt (argc, argv, "p:f:")) != -1) {
+	while ((c = getopt (argc, argv, "p:i:o:")) != -1) {
 		switch (c)
 		{
-			case 'f':
-				strcpy(config_file_path, optarg);
+			case 'i':
+				strcpy(config_in_path, optarg);
+				break;
+			case 'o':
+				strcpy(config_out_path, optarg);
 				break;
 			case 'p':
 				strcpy(port,optarg);
 				break;
 			default:
+				printf("\nERROR: Unknown parameter\n");
 				exit(-1);
 		}
 	}
 
-	printf("Server started at port no. %s%s%s with config file %s%s%s\n","\033[92m",port,"\033[0m","\033[92m",config_file_path,"\033[0m");
+	printf("AVS Auth Server started.\nPort: %s%s%s \nConfig in: %s%s%s \nConfig out: %s%s%s\n","\033[92m",port,"\033[0m","\033[92m",config_in_path,"\033[0m","\033[92m",config_out_path,"\033[0m");
 	
-	json_config = getCleanConfig(config_file_path);
+	json_config = getCleanConfig(config_in_path);
+	if (json_config == NULL) {
+		printf("ERROR: failed to parse the input config");
+		exit(-1);
+	}
 
 	// Setting all elements to -1: signifies there is no client connected
 	int i;
@@ -76,6 +95,15 @@ int main(int argc, char** argv)
 			{
 				respond(slot);
 				exit(0);
+			}else{
+				int status;
+				if (waitpid(-1, &status, 0) >0 )
+				{
+					if (WEXITSTATUS(status) == 0){
+						printf("\nSUCCESS\n");
+						exit(0);
+					}
+				}
 			}
 		}
 
@@ -136,7 +164,7 @@ void respond(int n)
 	memset( (void*)mesg, (int)'\0', 99999 );
 
 	rcvd=recv(clients[n], mesg, 99999, 0);
-        printf("!!!!!!!!Received request from client %d\n", n);
+    printf("\nINFO: Received request from client %d\n", n);
 
 	if (rcvd<0)    // receive error
 		fprintf(stderr,("recv() error\n"));
@@ -161,6 +189,14 @@ void respond(int n)
 					ret = handleUserRequest(clients[n]);
 				}else if (strncmp(reqline[1], "/authresponse", 13)==0) {
 					ret = handleAuthCodeGrant(clients[n], reqline[1]);
+					if (ret == 0) {
+						printf("\nGOOD: successfully generated the config with refresh token. Exit.\n");
+						//Closing SOCKET
+						shutdown (clients[n], SHUT_RDWR);         //All further send and recieve operations are DISABLED...
+						close(clients[n]);
+						clients[n]=-1;
+						exit(0);
+					}
 				}
 			}
 		}
@@ -170,4 +206,5 @@ void respond(int n)
 	shutdown (clients[n], SHUT_RDWR);         //All further send and recieve operations are DISABLED...
 	close(clients[n]);
 	clients[n]=-1;
+	exit(1);
 }

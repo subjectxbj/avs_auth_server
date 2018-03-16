@@ -16,30 +16,30 @@
         // Note: The directory specified must be valid.
         // The database file (alerts.db) will be created by SampleApp, do not create it yourself.
         // The database file should only be used for alerts (don't use it for other components of SDK)
-        "databaseFilePath":"${SDK_SQLITE_DATABASE_FILE_PATH}",
+        "databaseFilePath":"",
         // Path to default Alarm sound file. e.g. /home/ubuntu/alert_sounds/alarm_normal.mp3
         // Note: The audio file must exist and be a valid file.
-        "alarmSoundFilePath":"${SDK_ALARM_DEFAULT_SOUND_FILE_PATH}",
+        "alarmSoundFilePath":"",
         // Path to short Alarm sound file. e.g. /home/ubuntu/alert_sounds/alarm_short.wav
         // Note: The audio file must exist and be a valid file.
-        "alarmShortSoundFilePath":"${SDK_ALARM_SHORT_SOUND_FILE_PATH}",
+        "alarmShortSoundFilePath":"",
         // Path to default timer sound file. e.g. /home/ubuntu/alert_sounds/timer_normal.mp3
         // Note: The audio file must exist and be a valid file.
-        "timerSoundFilePath":"${SDK_TIMER_DEFAULT_SOUND_FILE_PATH}",
+        "timerSoundFilePath":"",
         // Path to short timer sound file. e.g. /home/ubuntu/alert_sounds/timer_short.wav
         // Note: The audio file must exist and be a valid file.
-        "timerShortSoundFilePath":"${SDK_TIMER_SHORT_SOUND_FILE_PATH}"
+        "timerShortSoundFilePath":""
    },
    "settings":{
         // Path to Settings database file. e.g. /home/ubuntu/Build/settings.db
         // Note: The directory specified must be valid.
         // The database file (settings.db) will be created by SampleApp, do not create it yourself.
         // The database file should only be used for settings (don't use it for other components of SDK)
-        "databaseFilePath":"${SDK_SQLITE_SETTINGS_DATABASE_FILE_PATH}",
+        "databaseFilePath":"",
         "defaultAVSClientSettings":{
             // Default language for Alexa.
             // See https://developer.amazon.com/docs/alexa-voice-service/settings.html#settingsupdated for valid values.
-            "locale":"${SETTING_LOCALE_VALUE}"
+            "locale":""
           }
     },
    "certifiedSender":{ 
@@ -47,7 +47,7 @@
         // Note: The directory specified must be valid.
         // The database file (certifiedsender.db) will be created by SampleApp, do not create it yourself.
         // The database file should only be used for certifiedSender (don't use it for other components of SDK)
-        "databaseFilePath":"${SDK_CERTIFIED_SENDER_DATABASE_FILE_PATH}"
+        "databaseFilePath":""
     }
  }
 
