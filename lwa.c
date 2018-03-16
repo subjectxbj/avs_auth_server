@@ -22,8 +22,6 @@ char * clientSecret = "70c955eaa6b998bb3eff97f051b18a5f72b21d38e3ba102da1e83aafd
 #endif
 char * scope = "alexa:all";
 char * responseType = "code";
-char * redirectUri="http://localhost:3000/authresponse";
-
 char * urlencode(char *json_string)
 {
         static char output[1024];
@@ -96,7 +94,7 @@ char*  getRedirectUrl(){
         strcat(lwaUrl, "&");
 
         memset(param, 0, sizeof(param));
-        sprintf(param, "redirect_uri=%s", urlencode(redirectUri));
+        sprintf(param, "redirect_uri=%s", urlencode(redirect_uri));
         strcat(lwaUrl, param);
 
         //printf("%s",lwaUrl);
@@ -178,7 +176,7 @@ int requestRefreshToken(char *code) {
 #else
 			get_config_param_value(json_config, "clientSecret"),
 #endif
-			urlencode(redirectUri)
+			urlencode(redirect_uri)
 			);
 		//printf("Params: %s\n",params);
 		
@@ -230,7 +228,7 @@ int requestRefreshToken(char *code) {
 int handleUserRequest(int client) {
 	printf("\n==============>Receive User Request");
 	char *redirectUrl = getRedirectUrl();
-	if (redirectUri == NULL) {
+	if (redirectUrl == NULL) {
 		return -1;
 	}
 	printf("\n==============>Redirect usr to URL: [%s]", redirectUrl);
@@ -240,6 +238,17 @@ int handleUserRequest(int client) {
 	write(client, content, strlen(content)+1);
 	write(client, "\n", 1);
 	return 0;
+}
+int returnResult(int client, int status, char *info) {
+	char content[1024]={0};
+	write(client, "HTTP/1.0 200\n",13);
+	write(client, "\n", 1);
+	if (status == 0){
+		sprintf(content, "<html><head><title>AVS LWA Success</title></head><body>Success</body></html>\n");
+	}else{
+		sprintf(content, "<html><head><title>AVS LWA Failure</title></head><body>Failed.%s</body></html>\n", info);
+	}
+	write(client, content, strlen(content));
 }
 int handleAuthCodeGrant(int client, char *request) {
 	char *tag, *code; 
@@ -252,14 +261,18 @@ int handleAuthCodeGrant(int client, char *request) {
 		printf("\n==============>Get Auth Code: [%s]", code);
 	else{
 		printf("\nERROR: Failed to extract auth code\n");
+		returnResult(client, -1, "Failed to extract auth code");
 		return -1;
 	}
 	ret = requestRefreshToken(code);
 	if (ret != 0){
 		printf("\nERROR: Failed to get refresh token\n");
+		returnResult(client, -1, "Failed to get refresh token");
 		return -1;
 	}
+	returnResult(client, 0, NULL);
 	printf("\n==============>Finish\n");
+   
 	return 0;
         	
 }

@@ -19,9 +19,11 @@
 #define PORT "3000"
 #define CONFIG_IN "AlexaClientSDKConfig.json"
 #define CONFIG_OUT "AlexaClientSDKConfig_out.json"
+#define REDIRECT_URI "http://localhost:3000/authresponse"
 
 char config_in_path[256]={0};
 char config_out_path[256]={0};
+char redirect_uri[256]={0};
 char port[16]={0};
 int listenfd, clients[CONNMAX];
 cJSON *json_config = NULL;
@@ -47,9 +49,10 @@ int main(int argc, char** argv)
 	strcpy(config_in_path, CONFIG_IN);
 	strcpy(config_out_path, CONFIG_OUT);
 	strcpy(port, PORT);
+	strcpy(redirect_uri, REDIRECT_URI);
 	//Parsing the command line arguments
 
-	while ((c = getopt (argc, argv, "p:i:o:")) != -1) {
+	while ((c = getopt (argc, argv, "p:i:o:r:")) != -1) {
 		switch (c)
 		{
 			case 'i':
@@ -61,13 +64,20 @@ int main(int argc, char** argv)
 			case 'p':
 				strcpy(port,optarg);
 				break;
+			case 'r':
+				strcpy(redirect_uri,optarg);
+				break;
 			default:
 				printf("\nERROR: Unknown parameter\n");
 				exit(-1);
 		}
 	}
 
-	printf("AVS Auth Server started.\nPort: %s%s%s \nConfig in: %s%s%s \nConfig out: %s%s%s\n","\033[92m",port,"\033[0m","\033[92m",config_in_path,"\033[0m","\033[92m",config_out_path,"\033[0m");
+	printf("AVS Auth Server started.\nPort: %s%s%s \nConfig in: %s%s%s \nConfig out: %s%s%s\nRedirect URI: %s%s%s\n",
+	"\033[92m",port,"\033[0m",
+	"\033[92m",config_in_path,"\033[0m",
+	"\033[92m",config_out_path,"\033[0m",
+	"\033[92m",redirect_uri,"\033[0m");
 	
 	json_config = getCleanConfig(config_in_path);
 	if (json_config == NULL) {
@@ -191,10 +201,6 @@ void respond(int n)
 					ret = handleAuthCodeGrant(clients[n], reqline[1]);
 					if (ret == 0) {
 						printf("\nGOOD: successfully generated the config with refresh token. Exit.\n");
-						//Closing SOCKET
-						shutdown (clients[n], SHUT_RDWR);         //All further send and recieve operations are DISABLED...
-						close(clients[n]);
-						clients[n]=-1;
 						exit(0);
 					}
 				}
