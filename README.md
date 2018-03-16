@@ -21,6 +21,7 @@ So before build this project, need to build and install these libraries:
     cd cJSON
     make 
     make install
+    ldconfig
 
 By default, these libraries and include files are installed under /usr/local
 

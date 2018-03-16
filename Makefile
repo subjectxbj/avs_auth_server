@@ -2,13 +2,13 @@ EXE = avs_server
 OBJS = main.o lwa.o config.o
 LIBS = -lcjson -lcurl
 
-CC = gcc
+#CC = gcc
 CFLAGS = -g 
 #CFLAGS += -DHARDCODE_CONFIG
 
 ALLOWED_INCLUDE_PATHS = -I/usr/local/include/cjson \
 			-I/usr/local/include/curl
-ALLOWED_LIB_PATHS = -L/usr/local/lib 
+ALLOWED_LIB_PATHS = -L/usr/local/lib/
 
 .PHONY: all clean install
 
