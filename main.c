@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 		clients[slot] = accept (listenfd, (struct sockaddr *) &clientaddr, &addrlen);
 
 		if (clients[slot]<0)
-			error ("accept() error");
+			printf("accept() error");
 		else
 		{
 			if ( fork()==0 )

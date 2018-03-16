@@ -6,11 +6,11 @@ CC = gcc
 CFLAGS = -g 
 #CFLAGS += -DHARDCODE_CONFIG
 
-ALLOWED_INCLUDE_PATHS = -I./cJSON \
-						-I/usr/include/arm-linux-gnueabihf/curl
-ALLOWED_LIB_PATHS = ./cJSON
+ALLOWED_INCLUDE_PATHS = -I/usr/local/include/cjson \
+			-I/usr/local/include/curl
+ALLOWED_LIB_PATHS = -L/usr/local/lib 
 
-.PHONY: all clean
+.PHONY: all clean install
 
 all: $(EXE)
 
@@ -24,6 +24,8 @@ lwa.o: lwa.c
 	$(CC) -c $(CFLAGS) lwa.c -o lwa.o $(ALLOWED_INCLUDE_PATHS)
 config.o: config.c
 	$(CC) -c $(CFLAGS) config.c -o config.o $(ALLOWED_INCLUDE_PATHS)
+install:
+	cp $(EXE) /usr/local/bin/
 	
 clean:
 	rm $(OBJS)
