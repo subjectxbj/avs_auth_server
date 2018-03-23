@@ -6,11 +6,11 @@ LIBS = -ljson-c -lcurl
 CFLAGS = -g 
 #CFLAGS += -DHARDCODE_CONFIG
 
-ALLOWED_INCLUDE_PATHS = -I/usr/local/include/json-c \
-			-I/usr/local/include/curl \
-			-I/usr/include/json-c \
-			-I/usr/include/curl
-ALLOWED_LIB_PATHS = -L/usr/local/lib/:/usr/lib/
+ALLOWED_INCLUDE_PATHS = -I$(ROOTFS)/usr/local/include/json-c \
+			-I$(ROOTFS)/usr/local/include/curl \
+			-I$(ROOTFS)/usr/include/json-c \
+			-I$(ROOTFS)/usr/include/curl
+ALLOWED_LIB_PATHS = -L$(ROOTFS)/usr/local/lib/:$(ROOTFS)/usr/lib/
 
 .PHONY: all clean install
 
@@ -27,7 +27,7 @@ lwa.o: lwa.c
 config.o: config.c
 	$(CC) -c $(CFLAGS) config.c -o config.o $(ALLOWED_INCLUDE_PATHS)
 install:
-	cp $(EXE) /usr/local/bin/
+	cp $(EXE) $(ROOTFS)/usr/local/bin/
 	
 clean:
 	rm $(OBJS)
