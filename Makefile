@@ -7,8 +7,10 @@ CFLAGS = -g
 #CFLAGS += -DHARDCODE_CONFIG
 
 ALLOWED_INCLUDE_PATHS = -I/usr/local/include/json-c \
-			-I/usr/local/include/curl
-ALLOWED_LIB_PATHS = -L/usr/local/lib/
+			-I/usr/local/include/curl \
+			-I/usr/include/json-c \
+			-I/usr/include/curl
+ALLOWED_LIB_PATHS = -L/usr/local/lib/:/usr/lib/
 
 .PHONY: all clean install
 
