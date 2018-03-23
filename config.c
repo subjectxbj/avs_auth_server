@@ -9,7 +9,7 @@
 #include<netdb.h>
 #include<signal.h>
 #include<fcntl.h>
-#include "cJSON.h"
+#include "json.h"
 #include "config.h"
 
 int isCommentLine(char *line){
@@ -35,7 +35,7 @@ int isCommentLine(char *line){
 	return 0;
 }
 
-cJSON* getCleanConfig(char *filename) {
+json_object* getCleanConfig(char *filename) {
 	FILE *fd;
 	char buffer[102400]={0};
 	char *pline = NULL;
@@ -60,8 +60,8 @@ cJSON* getCleanConfig(char *filename) {
 	fclose(fd);
 	//printf("\n==============>Clean Config: %s\n", buffer);
 
-	cJSON *json = NULL;
-	json = cJSON_Parse(buffer);
+	json_object *json = NULL;
+	json = json_tokener_parse(buffer);
 	if (json) {
 		//printf("JSON parse OK.\n");
 		//printf(cJSON_Print(json));
@@ -73,12 +73,12 @@ cJSON* getCleanConfig(char *filename) {
 
 }
 
-int writeConfig(cJSON *json, char *filename) {
+int writeConfig(json_object *json, char *filename) {
 	FILE *fd;
 	fd = fopen(filename, "w+");
 	if (fd) {
 		char *output;
-		output = cJSON_Print(json);
+		output = json_object_to_json_string(json);
 		if (output) {
 			size_t len = strlen(output);
 			fwrite(output, len, 1, fd);
@@ -92,49 +92,42 @@ int writeConfig(cJSON *json, char *filename) {
 }
 
 
-cJSON *get_config_param(cJSON *config, char *name){
-	cJSON *authDelegate = cJSON_GetObjectItem(config, "authDelegate");
+json_object *get_config_param(json_object *config, char *name){
+	json_object *authDelegate = json_object_object_get(config, "authDelegate");
 	if(authDelegate == NULL) {
 		return NULL;
 	}
 	
 	if (strcmp(name, "clientSecret") == 0) {
-		cJSON *clientSecret = cJSON_GetObjectItem(authDelegate, "clientSecret");
+		json_object *clientSecret = json_object_object_get(authDelegate, "clientSecret");
 		return clientSecret;
 	}else if (strcmp(name, "deviceSerialNumber") == 0) {
-		cJSON *deviceSerialNumber = cJSON_GetObjectItem(authDelegate, "deviceSerialNumber");
+		json_object *deviceSerialNumber = json_object_object_get(authDelegate, "deviceSerialNumber");
 		return deviceSerialNumber;
 	}else if (strcmp(name, "refreshToken") == 0) {
-		cJSON *refreshToken = cJSON_GetObjectItem(authDelegate, "refreshToken");
+		json_object *refreshToken = json_object_object_get(authDelegate, "refreshToken");
 		return refreshToken;
 	}else if (strcmp(name, "clientId") == 0) {
-		cJSON *clientId = cJSON_GetObjectItem(authDelegate, "clientId");
+		json_object *clientId = json_object_object_get(authDelegate, "clientId");
 		return clientId;
 	}else if (strcmp(name, "productId") == 0) {
-		cJSON *productId = cJSON_GetObjectItem(authDelegate, "productId");
+		json_object *productId = json_object_object_get(authDelegate, "productId");
 		return productId;
 	}
 	return NULL;
 }
-char *get_config_param_value(cJSON *config, char *name){
-	cJSON *param;
+char *get_config_param_value(json_object *config, char *name){
+	json_object *param;
 	param = get_config_param(config, name);
-	return param? param->valuestring: NULL;
+	return param? json_object_get_string(param): NULL;
 }
 
-int update_config_param(cJSON *config, char *name, char *value) {
-	char *new_string = malloc(strlen(value)+1);
+int update_config_param(json_object *config, char *name, char *value) {
+        json_object_object_del(config, name);
+
+        json_object_object_add(config, name, json_object_new_string(value));
 	
-	strcpy(new_string, value);
-	cJSON *param;
-	param = get_config_param(config, name);
-	if (param) {
-		free(param->valuestring);
-		param->valuestring = new_string;
-		return 0;
-	}else{
-		return 1;
-	}
+	return 0;
 	
 }
 

@@ -1,12 +1,12 @@
 EXE = avs_server
 OBJS = main.o lwa.o config.o
-LIBS = -lcjson -lcurl
+LIBS = -ljson-c -lcurl
 
 #CC = gcc
 CFLAGS = -g 
 #CFLAGS += -DHARDCODE_CONFIG
 
-ALLOWED_INCLUDE_PATHS = -I/usr/local/include/cjson \
+ALLOWED_INCLUDE_PATHS = -I/usr/local/include/json-c \
 			-I/usr/local/include/curl
 ALLOWED_LIB_PATHS = -L/usr/local/lib/
 

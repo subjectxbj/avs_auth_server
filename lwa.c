@@ -9,7 +9,7 @@
 #include<netdb.h>
 #include<signal.h>
 #include<fcntl.h>
-#include "cJSON.h"
+#include "json.h"
 #include "lwa.h"
 #include "curl.h"
 #include "config.h"
@@ -48,22 +48,22 @@ char * urlencode(char *json_string)
 char*  getRedirectUrl(){
         static char lwaUrl[1000];
         char *scopeData;
-        cJSON *alexa_all, *attr;
-        cJSON *root = cJSON_CreateObject();
-        cJSON_AddItemToObject(root, "alexa:all", alexa_all=cJSON_CreateObject());
+        json_object *alexa_all, *attr;
+        json_object *root = json_object_new_object();
+        json_object_object_add(root, "alexa:all", alexa_all=json_object_new_object());
 #ifdef HARDCODE_CONFIG
-        cJSON_AddStringToObject(alexa_all, "productID", productId);
+        json_object_object_add(alexa_all, "productID", json_object_new_string(productId));
 #else
-        cJSON_AddStringToObject(alexa_all, "productID",get_config_param_value(json_config, "productId"));
+        json_object_object_add(alexa_all, "productID",json_object_new_string(get_config_param_value(json_config, "productId")));
 #endif
-        cJSON_AddItemToObject(alexa_all, "productInstanceAttributes", attr=cJSON_CreateObject());
+        json_object_object_add(alexa_all, "productInstanceAttributes", attr=json_object_new_object());
 #ifdef HARDCODE_CONFIG
-        cJSON_AddStringToObject(attr, "deviceSerialNumber", deviceSerialNumber);
+        json_object_object_add(attr, "deviceSerialNumber", json_object_new_string(deviceSerialNumber));
 #else
-        cJSON_AddStringToObject(attr, "deviceSerialNumber", get_config_param_value(json_config, "deviceSerialNumber"));
+        json_object_object_add(attr, "deviceSerialNumber", json_object_new_string(get_config_param_value(json_config, "deviceSerialNumber")));
 #endif
-        scopeData = cJSON_Print(root);
-        cJSON_Delete(root);
+        scopeData = json_object_to_json_string(root);
+        json_object_put(root);
         //printf("%s", scopeData);
 
         memset(lwaUrl, 0, sizeof(lwaUrl));
@@ -75,6 +75,7 @@ char*  getRedirectUrl(){
 #else
         sprintf(param, "client_id=%s", get_config_param_value(json_config, "clientId"));
 #endif
+        printf("param:%s\n",param);
         strcat(lwaUrl, param);
         strcat(lwaUrl, "&");
 
@@ -103,34 +104,34 @@ char*  getRedirectUrl(){
 
 }
 int parseResponse(char *response) {
-		cJSON *json = NULL;
+		json_object *json = NULL;
 		int ret;
-		json = cJSON_Parse(response);
+		json = json_tokener_parse(response);
 		if (json) {
-			cJSON *refreshTokenObject = cJSON_GetObjectItem(json, "refresh_token");
+			json_object *refreshTokenObject = json_object_object_get(json, "refresh_token");
 			if(refreshTokenObject) {
-				char *refreshToken = refreshTokenObject->valuestring;
+				char *refreshToken = json_object_get_string(refreshTokenObject);
 				if(refreshToken) {
 					printf("\n==============>Get Refresh Token: [%s]\n", refreshToken);
 					ret = update_config_param(json_config, "refreshToken", refreshToken);
 					if (ret != 0){
 						printf("\nERROR: Failed to update refresh token\n");
-						cJSON_Delete(json);
+						json_object_put(json);
 						return -1;
 					}
 					ret = writeConfig(json_config, config_out_path);
 					if (ret != 0){
 						printf("\nERROR: Failed to write config to [%s]\n", config_out_path);
-						cJSON_Delete(json);
+						json_object_put(json);
 						return -1;
 					}
 				}
 			}else{
 				printf("\nERROR: Failed to get refresh_token from response\n");
-				cJSON_Delete(json);
+				json_object_put(json);
 				return -1;
 			}
-			cJSON_Delete(json);
+			json_object_put(json);
 			return 0;
 		}else{
 			printf("\nERROR: Failed to parse response\n");

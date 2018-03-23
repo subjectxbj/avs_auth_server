@@ -10,7 +10,7 @@
 #include<netdb.h>
 #include<signal.h>
 #include<fcntl.h>
-#include "cJSON.h"
+#include "json.h"
 #include "lwa.h"
 #include "config.h"
 
@@ -26,7 +26,7 @@ char config_out_path[256]={0};
 char redirect_uri[256]={0};
 char port[16]={0};
 int listenfd, clients[CONNMAX];
-cJSON *json_config = NULL;
+json_object *json_config = NULL;
 
 
 void error(char *);

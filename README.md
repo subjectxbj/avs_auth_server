@@ -5,7 +5,7 @@ This is too expensive for an embled device.
 
 So this project will use ANSI c to implement similar function.
 
-This application has dependency on following items: curl and cJSON.
+This application has dependency on following items: curl and json-c.
 
 So before build this project, need to build and install these libraries:
 
@@ -17,8 +17,10 @@ So before build this project, need to build and install these libraries:
     make
     make install
 
-    git clone https://github.com/DaveGamble/cJSON.git
-    cd cJSON
+    git clone https://github.com/json-c/json-c.git
+    cd json-c 
+    ./autogen.sh
+    ./configure
     make 
     make install
     ldconfig
