@@ -67,7 +67,8 @@ json_object* getCleanConfig(char *filename) {
 		//printf(cJSON_Print(json));
 		//printf("\n");
 	}else{
-		printf("Failed to parse response\n");
+		printf("Failed to parse config\n");
+		return NULL;
 	}
 	return json;
 
@@ -123,11 +124,20 @@ char *get_config_param_value(json_object *config, char *name){
 }
 
 int update_config_param(json_object *config, char *name, char *value) {
-        json_object_object_del(config, name);
+	json_object *authDelegate = json_object_object_get(config, "authDelegate");
+	if(authDelegate == NULL) {
+		return -1;
+	}
+	if (strcmp(name, "refreshToken") == 0){
+        json_object_object_del(authDelegate, "refreshToken");
 
-        json_object_object_add(config, name, json_object_new_string(value));
+        json_object_object_add(authDelegate, "refreshToken", json_object_new_string(value));
+        
+        return 0;
+	}
 	
-	return 0;
+	return -1;
 	
 }
+
 

@@ -22,7 +22,7 @@ char * clientSecret = "70c955eaa6b998bb3eff97f051b18a5f72b21d38e3ba102da1e83aafd
 #endif
 char * scope = "alexa:all";
 char * responseType = "code";
-char * urlencode(char *json_string)
+static char * urlencode(char *json_string)
 {
         static char output[1024];
         memset(output, 0, sizeof(output));
@@ -45,7 +45,7 @@ char * urlencode(char *json_string)
 }
 
 
-char*  getRedirectUrl(){
+static char*  getRedirectUrl(json_object *config){
         static char lwaUrl[1000];
         char *scopeData;
         json_object *alexa_all, *attr;
@@ -54,13 +54,13 @@ char*  getRedirectUrl(){
 #ifdef HARDCODE_CONFIG
         json_object_object_add(alexa_all, "productID", json_object_new_string(productId));
 #else
-        json_object_object_add(alexa_all, "productID",json_object_new_string(get_config_param_value(json_config, "productId")));
+        json_object_object_add(alexa_all, "productID",json_object_new_string(get_config_param_value(config, "productId")));
 #endif
         json_object_object_add(alexa_all, "productInstanceAttributes", attr=json_object_new_object());
 #ifdef HARDCODE_CONFIG
         json_object_object_add(attr, "deviceSerialNumber", json_object_new_string(deviceSerialNumber));
 #else
-        json_object_object_add(attr, "deviceSerialNumber", json_object_new_string(get_config_param_value(json_config, "deviceSerialNumber")));
+        json_object_object_add(attr, "deviceSerialNumber", json_object_new_string(get_config_param_value(config, "deviceSerialNumber")));
 #endif
         scopeData = json_object_to_json_string(root);
         json_object_put(root);
@@ -73,7 +73,7 @@ char*  getRedirectUrl(){
 #ifdef HARDCODE_CONFIG
         sprintf(param, "client_id=%s", clientId);
 #else
-        sprintf(param, "client_id=%s", get_config_param_value(json_config, "clientId"));
+        sprintf(param, "client_id=%s", get_config_param_value(config, "clientId"));
 #endif
         printf("param:%s\n",param);
         strcat(lwaUrl, param);
@@ -103,7 +103,7 @@ char*  getRedirectUrl(){
       
 
 }
-int parseResponse(char *response) {
+static int parseResponse(char *response, json_object *config) {
 		json_object *json = NULL;
 		int ret;
 		json = json_tokener_parse(response);
@@ -113,15 +113,15 @@ int parseResponse(char *response) {
 				char *refreshToken = json_object_get_string(refreshTokenObject);
 				if(refreshToken) {
 					printf("\n==============>Get Refresh Token: [%s]\n", refreshToken);
-					ret = update_config_param(json_config, "refreshToken", refreshToken);
+					ret = update_config_param(config, "refreshToken", refreshToken);
 					if (ret != 0){
 						printf("\nERROR: Failed to update refresh token\n");
 						json_object_put(json);
 						return -1;
 					}
-					ret = writeConfig(json_config, config_out_path);
+					ret = writeConfig(config, config_path);
 					if (ret != 0){
-						printf("\nERROR: Failed to write config to [%s]\n", config_out_path);
+						printf("\nERROR: Failed to write config to [%s]\n", config_path);
 						json_object_put(json);
 						return -1;
 					}
@@ -139,14 +139,14 @@ int parseResponse(char *response) {
 		}	
 }
 char resp[10240]={0};
-size_t write_data(void* buffer, size_t size, size_t nmemb, void* response) {
+static size_t write_data(void* buffer, size_t size, size_t nmemb, void* response) {
 	int len = size*nmemb;
 	memset(resp, 0, sizeof(resp));
 	memcpy(response, buffer, len);
 	return len;
 }
 
-int requestRefreshToken(char *code) {
+static int requestRefreshToken(char *code, json_object *config) {
 	CURL *curl;
 	CURLcode res;
 	int ret;
@@ -170,12 +170,12 @@ int requestRefreshToken(char *code) {
 #ifdef HARDCODE_CONFIG
 			clientId,
 #else
-			get_config_param_value(json_config, "clientId"),
+			get_config_param_value(config, "clientId"),
 #endif
 #ifdef HARDCODE_CONFIG
 			clientSecret,
 #else
-			get_config_param_value(json_config, "clientSecret"),
+			get_config_param_value(config, "clientSecret"),
 #endif
 			urlencode(redirect_uri)
 			);
@@ -205,7 +205,7 @@ int requestRefreshToken(char *code) {
 			printf("OK\n");
 		}
 		printf("\n==============>Get RESPONSE: %s\n", resp);
-		ret = parseResponse(resp);
+		ret = parseResponse(resp, config);
 		if (ret != 0){
 			printf("ERROR: parseResponse failed\n");
 			curl_easy_cleanup(curl);
@@ -226,9 +226,20 @@ int requestRefreshToken(char *code) {
 	}	
 }
 
-int handleUserRequest(int client) {
+static int returnResult(int client, int status, char *info) {
+	char content[1024]={0};
+	write(client, "HTTP/1.0 200\n",13);
+	write(client, "\n", 1);
+	if (status == 0){
+		sprintf(content, "<html><head><title>AVS LWA Success</title></head><body>Success</body></html>\n");
+	}else{
+		sprintf(content, "<html><head><title>AVS LWA Failure</title></head><body>Failed.%s</body></html>\n", info);
+	}
+	write(client, content, strlen(content));
+}
+int handleUserRequest(int client, json_object *config) {
 	printf("\n==============>Receive User Request");
-	char *redirectUrl = getRedirectUrl();
+	char *redirectUrl = getRedirectUrl(config);
 	if (redirectUrl == NULL) {
 		return -1;
 	}
@@ -240,18 +251,7 @@ int handleUserRequest(int client) {
 	write(client, "\n", 1);
 	return 0;
 }
-int returnResult(int client, int status, char *info) {
-	char content[1024]={0};
-	write(client, "HTTP/1.0 200\n",13);
-	write(client, "\n", 1);
-	if (status == 0){
-		sprintf(content, "<html><head><title>AVS LWA Success</title></head><body>Success</body></html>\n");
-	}else{
-		sprintf(content, "<html><head><title>AVS LWA Failure</title></head><body>Failed.%s</body></html>\n", info);
-	}
-	write(client, content, strlen(content));
-}
-int handleAuthCodeGrant(int client, char *request) {
+int handleAuthCodeGrant(int client, char *request, json_object *config) {
 	char *tag, *code; 
 	int ret;
 	printf("\n==============>Receive authresponse");
@@ -265,7 +265,7 @@ int handleAuthCodeGrant(int client, char *request) {
 		returnResult(client, -1, "Failed to extract auth code");
 		return -1;
 	}
-	ret = requestRefreshToken(code);
+	ret = requestRefreshToken(code, config);
 	if (ret != 0){
 		printf("\nERROR: Failed to get refresh token\n");
 		returnResult(client, -1, "Failed to get refresh token");
