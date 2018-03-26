@@ -63,7 +63,7 @@ static char*  getRedirectUrl(json_object *config){
         json_object_object_add(attr, "deviceSerialNumber", json_object_new_string(get_config_param_value(config, "deviceSerialNumber")));
 #endif
         scopeData = json_object_to_json_string(root);
-        json_object_put(root);
+        
         //printf("%s", scopeData);
 
         memset(lwaUrl, 0, sizeof(lwaUrl));
@@ -88,6 +88,7 @@ static char*  getRedirectUrl(json_object *config){
         sprintf(param, "scope_data=%s", urlencode(scopeData));
         strcat(lwaUrl, param);
         strcat(lwaUrl, "&");
+        json_object_put(root);
 
         memset(param, 0, sizeof(param));
         sprintf(param, "response_type=%s", responseType);
