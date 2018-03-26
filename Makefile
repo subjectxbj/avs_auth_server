@@ -28,6 +28,8 @@ config.o: config.c
 	$(CC) -c $(CFLAGS) config.c -o config.o $(ALLOWED_INCLUDE_PATHS)
 install:
 	cp $(EXE) $(ROOTFS)/usr/local/bin/
+	mkdir $(ROOTFS)/etc/alexa
+	cp -r web $(ROOTFS)/etc/alexa/	
 	
 clean:
 	rm $(OBJS)
