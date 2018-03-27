@@ -79,7 +79,7 @@ int writeConfig(json_object *json, char *filename) {
 	fd = fopen(filename, "w+");
 	if (fd) {
 		char *output;
-		output = json_object_to_json_string(json);
+		output = json_object_to_json_string_ext(json, JSON_C_TO_STRING_PRETTY);
 		if (output) {
 			size_t len = strlen(output);
 			fwrite(output, len, 1, fd);
