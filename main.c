@@ -303,12 +303,15 @@ void respond(int n)
 					if (ret == 0) {
 						printf("\nGOOD: successfully generated the config with refresh token. Exit.\n");
 						ret = sendFromDirectory(clients[n], web_root, "things_to_try.html");
+						system("service alexa restart");
 					}
 				}else if(strncmp(reqline[1], "/login", 6)==0) {
 					ret = handleUserRequest(clients[n], json_config);
 				}else if(strncmp(reqline[1], "/logout", 7)==0) {
 					copyFile(config_default_path, config_path);
 					ret = sendRedirect(clients[n], "/splash_screen.html");
+					// Force to stop alexa
+					system("service alexa stop");
 				}
 				else{
 					ret = sendFromDirectory(clients[n], web_root, reqline[1]);
